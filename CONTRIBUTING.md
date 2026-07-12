@@ -28,12 +28,42 @@ Our workspace enforces clean separation between kernel-space bytecode execution,
 ## 🛠️ Prerequisites & Setup
 
 Because we compile Rust into eBPF bytecode targeting `bpfeb-unknown-none`, standard target management tools won't cut it. We use an explicit compilation pipeline via `xtask`.
+### 1. Install System Dependencies
 
-### 1. Install System Dependencies (Fedora)
-Ensure your host machine has the matching LLVM toolchain, kernel headers, and bpf tools:
+Select the command corresponding to your operating system to install the required LLVM toolchain, ELF development libraries, and kernel monitoring utilities:
+
+#### Fedora / Red Hat
 ```bash
 sudo dnf install clang llvm elfutils-libelf-devel bpftool kernel-devel
 ```
+
+#### Ubuntu / Debian
+```bash
+sudo apt update
+sudo apt install clang llvm libelf-dev linux-headers-$(uname -r) bpftool
+```
+*(Note: On certain Debian/Ubuntu LTS distributions, `bpftool` may instead be packaged inside `linux-tools-common` and `linux-tools-$(uname -r)`).*
+
+#### Arch Linux
+```bash
+sudo pacman -Syu
+sudo pacman -S clang llvm libelf bpf linux-headers
+```
+*(Note: On Arch Linux, the `bpftool` utility is contained within the core `bpf` package).*
+
+#### macOS (Cross-Compilation & Toolchain Verification Only)
+```bash
+brew install llvm libelf
+```
+
+> ⚠️ **Important Note for macOS Contributors:**
+> macOS does not run a Linux kernel natively. Installing these local dependencies is strictly to allow your local IDE toolchains (`rust-analyzer`) to cross-compile, parse, and verify codebase structures cleanly.
+> 
+> To ensure the Homebrew LLVM toolchain overrides Apple's default toolchain stubs, append it to your path:
+> ```bash
+> echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.zshrc
+> ```
+> To actively run, inject, or run validation profiling against the firewall bytecode, macOS developers **must** utilize the automated Linux guest execution engine via `cargo xtask`.
 
 ### 2. Install BPF Linker
 We use the specialized LLVM-based linker for Rust eBPF programs to emit valid ELF binaries that the kernel can verify:
