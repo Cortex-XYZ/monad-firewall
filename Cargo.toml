@@ -1,11 +1,16 @@
 [workspace]
 resolver = "2"
 members = [
-    "monad-firewall",
-    "monad-firewall-common",
-    "monad-firewall-ebpf",
+    "monad-firewall-core",   # main firewall app
+    "monad-firewall-cli",    # clap command line interface
+    "monad-firewall-common", # shared libs & types
+    "monad-firewall-ebpf",   # ebpf bytecode
+    "monad-firewall-docs",   # documentation
+    "monad-firewall-rules",  # firewall rules parser
+    "monad-firewall-server", # firewall rules web UI (optional)
+    "xtask",  # automation
 ]
-default-members = ["monad-firewall", "monad-firewall-common"]
+default-members = ["monad-firewall-core", "monad-firewall-common","monad-firewall-rules"]
 
 [workspace.package]
 license = "MIT OR Apache-2.0"

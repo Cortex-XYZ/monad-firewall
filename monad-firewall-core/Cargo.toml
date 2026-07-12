@@ -1,5 +1,5 @@
 [package]
-name = "monad-firewall"
+name = "monad-firewall-core"
 version = "0.1.0"
 edition.workspace = true
 
