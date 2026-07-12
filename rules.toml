@@ -1,0 +1,53 @@
+# monad-firewall allowlist
+#
+# Each entry permits traffic from `ip` to `port`. Any packet whose
+# (source IP, destination port) pair is NOT listed here will be dropped.
+#
+# `ip` is an IPv4 address in dotted-quad notation.
+# `port` is a TCP/UDP port number (1-65535).
+
+[[allow]]
+ip = "127.0.0.1"
+port = 22
+
+[[allow]]
+ip = "127.0.0.1"
+port = 880
+
+[[allow]]
+ip = "127.0.0.1"
+port = 443
+
+## info from ```ss -tupln & lsof -i ```
+
+# monad default ports
+# udp    UNCONN  0       0              0.0.0.0:8000        0.0.0.0:*
+# udp    UNCONN  0       0              0.0.0.0:8001        0.0.0.0:*
+
+# DNS
+# udp    UNCONN  0       0           127.0.0.54:53          0.0.0.0:*
+# udp    UNCONN  0       0        127.0.0.53%lo:53          0.0.0.0:*
+
+# time tracking?
+# udp    UNCONN  0       0            127.0.0.1:323         0.0.0.0:*
+# udp    UNCONN  0       0                [::1]:323            [::]:*
+
+# monad-node
+# tcp    LISTEN  0       1024           0.0.0.0:8080        0.0.0.0:*
+# tcp    LISTEN  0       1024           0.0.0.0:8000        0.0.0.0:*
+
+# custom ssh
+# tcp    LISTEN  0       4096           0.0.0.0:14422        0.0.0.0:*
+
+# DNS
+# tcp    LISTEN  0       4096        127.0.0.54:53          0.0.0.0:*
+# tcp    LISTEN  0       4096     127.0.0.53%lo:53          0.0.0.0:*
+
+# Custom ssh
+# tcp    LISTEN  0       4096              [::]:14422           [::]:*
+
+# OTEL
+# tcp    LISTEN  0       4096         127.0.0.1:8888        0.0.0.0:*
+# tcp    LISTEN  0       4096                 *:8889              *:*
+# tcp    LISTEN  0       4096                 *:4318              *:*
+# tcp    LISTEN  0       4096                 *:4317              *:*

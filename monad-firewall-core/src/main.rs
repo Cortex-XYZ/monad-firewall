@@ -1,11 +1,11 @@
-use std::fs;
+// use std::fs;
 
 use anyhow::Context as _;
 use aya::programs::{Xdp, XdpMode};
 use clap::Parser;
 #[rustfmt::skip]
 use log::warn;
-use monad_firewall_common::AllowList;
+// use monad_firewall_common::AllowList;
 use tokio::signal;
 
 mod setup;
@@ -62,17 +62,17 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn get_firewall_rules() {
-    let config: Config = toml::from_str(&fs::read_to_string("rule.toml")?)?;
-    let rules = ebpf.map_mut("RULES").unwrap();
-    for rule in config.allow {
-        let key = AllowList {
-            ip: rule.ip,
-            port: rule.port,
-            _pad: 0,
-        };
+// fn get_firewall_rules() {
+//     let config: Config = toml::from_str(&fs::read_to_string("rule.toml")?)?;
+//     let rules = ebpf.map_mut("RULES").unwrap();
+//     for rule in config.allow {
+//         let key = AllowList {
+//             ip: rule.ip,
+//             port: rule.port,
+//             _pad: 0,
+//         };
 
-        rules.insert(0, &key, &1u8, 0)?;
-    }
-    rules
-}
+//         rules.insert(0, &key, &1u8, 0)?;
+//     }
+//     rules
+// }

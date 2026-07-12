@@ -75,6 +75,8 @@ cargo install bpf-linker
 
 ## 🚀 The Development Loop (`xtask`)
 
+!!! UNDER_CONSTRUCTION: Currently migrating to xtask, might not be ideal setup (aya can definitely link and built without it, but xtask is convenience for larger project)
+
 Do **not** run standard `cargo build` or `cargo check` from the workspace root. Our root configuration targets a localized subset of standard crates by default (`default-members`) to avoid environmental toolchain errors for non-eBPF work. All pipeline commands should flow through our custom `xtask` orchestrator.
 
 ### Building eBPF Bytecode & User Space
