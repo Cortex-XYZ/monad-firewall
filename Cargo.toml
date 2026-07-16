@@ -40,3 +40,11 @@ which = { version = "6.0.0", default-features = false }
 debug = 2
 codegen-units = 1
 strip = false
+
+[workspace.lints.rust]
+nonstandard_style = "deny"
+future_incompatible = "warn"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
