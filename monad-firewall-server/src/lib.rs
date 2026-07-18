@@ -121,11 +121,11 @@ struct Status {
     status: &'static str,
 }
 
-async fn healthz() -> Json<Status> {
+async fn health() -> Json<Status> {
     Json(Status { status: "ok" })
 }
 
-async fn readyz() -> Json<Status> {
+async fn ready() -> Json<Status> {
     // NOTE: this is a stub
     Json(Status { status: "ready" })
 }
@@ -159,8 +159,8 @@ async fn counters(
 
 pub fn app(state: SharedState) -> Router {
     Router::new()
-        .route("/healthz", get(healthz))
-        .route("/readyz", get(readyz))
+        .route("/health", get(health))
+        .route("/ready", get(ready))
         .route("/api/rules", get(list_rules).post(add_rule))
         .route("/api/rules/{ip}/{port}", axum::routing::delete(remove_rule))
         .route("/api/counters", get(counters))
@@ -230,14 +230,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn healthz_returns_ok() {
-        let res = test_app().oneshot(get("/healthz")).await.unwrap();
+    async fn health_returns_ok() {
+        let res = test_app().oneshot(get("/health")).await.unwrap();
         assert_eq!(res.status(), StatusCode::OK);
     }
 
     #[tokio::test]
-    async fn readyz_returns_ok() {
-        let res = test_app().oneshot(get("/readyz")).await.unwrap();
+    async fn ready_returns_ok() {
+        let res = test_app().oneshot(get("/ready")).await.unwrap();
         assert_eq!(res.status(), StatusCode::OK);
     }
 
