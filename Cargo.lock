@@ -668,6 +668,7 @@ dependencies = [
  "anyhow",
  "axum",
  "aya",
+ "monad-firewall-common",
  "serde",
  "serde_json",
  "thiserror",

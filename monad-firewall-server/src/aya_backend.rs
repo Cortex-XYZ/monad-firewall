@@ -44,7 +44,7 @@ impl FirewallState for AyaFirewallState {
         self.counters
             .iter()
             .map(|entry| {
-                let (key, packets) = entry.map_err(|err| FirewallError::Backend(err.into()))?;
+                let (key, packets) = entry.map_err(FirewallError::Map)?;
                 Ok(SourceCounter {
                     ip: key_to_ip(key),
                     packets,

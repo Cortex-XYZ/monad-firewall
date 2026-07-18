@@ -13,6 +13,8 @@ use serde::{Deserialize, Serialize};
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
+use monad_firewall_common::AllowEntry;
+
 #[cfg(feature = "aya-backend")]
 pub mod aya_backend;
 
@@ -20,6 +22,24 @@ pub mod aya_backend;
 pub struct Rule {
     pub ip: Ipv4Addr,
     pub port: u16,
+}
+
+impl From<AllowEntry> for Rule {
+    fn from(entry: AllowEntry) -> Self {
+        Rule {
+            ip: Ipv4Addr::from(entry.ip),
+            port: entry.port,
+        }
+    }
+}
+
+impl From<Rule> for AllowEntry {
+    fn from(rule: Rule) -> Self {
+        AllowEntry {
+            ip: u32::from(rule.ip),
+            port: rule.port,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -36,10 +56,12 @@ pub enum FirewallError {
     Unsupported(&'static str),
     #[error("rule not found")]
     NotFound,
-
-    /// A lower-level backend, IO, or eBPF failure.
-    #[error(transparent)]
-    Backend(#[from] anyhow::Error),
+    #[cfg(feature = "aya-backend")]
+    #[error("failed to read/write eBPF map: {0}")]
+    Map(#[from] aya::maps::MapError),
+    #[cfg(feature = "aya-backend")]
+    #[error("failed to load pinned map: {0}")]
+    Pin(#[from] std::io::Error),
 }
 
 pub trait FirewallState: Send + Sync + 'static {
@@ -182,8 +204,14 @@ impl IntoResponse for FirewallError {
             )
                 .into_response(),
             FirewallError::NotFound => (StatusCode::NOT_FOUND, "rule not found").into_response(),
-            FirewallError::Backend(err) => {
-                tracing::error!("backend error: {err:#}");
+            #[cfg(feature = "aya-backend")]
+            FirewallError::Map(err) => {
+                tracing::error!("map error: {err}");
+                (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
+            }
+            #[cfg(feature = "aya-backend")]
+            FirewallError::Pin(err) => {
+                tracing::error!("pin error: {err}");
                 (StatusCode::INTERNAL_SERVER_ERROR, "internal error").into_response()
             }
         }
