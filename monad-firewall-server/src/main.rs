@@ -62,7 +62,7 @@ async fn main() -> anyhow::Result<()> {
     let state = build_state()?;
 
     let addr: SocketAddr = std::env::var("MONAD_FW_SERVER_ADDR")
-        .unwrap_or_else(|_| "127.0.0.1:8787".to_string())
+        .unwrap_or_else(|_| "0.0.0.0:8787".to_string())
         .parse()?;
 
     let listener = TcpListener::bind(addr).await?;
