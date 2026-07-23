@@ -2,6 +2,8 @@
 
 ## Prerequisites
 
+> TIP: `make doctor` is your friendly environment diagnostician
+
 1. stable rust toolchains: `rustup toolchain install stable`
 1. nightly rust toolchains: `rustup toolchain install nightly --component rust-src`
 1. (if cross-compiling) rustup target: `rustup target add ${ARCH}-unknown-linux-musl`

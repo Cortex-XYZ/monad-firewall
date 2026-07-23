@@ -51,6 +51,22 @@ sudo pacman -S clang llvm libelf bpf linux-headers
 ```
 *(Note: On Arch Linux, the `bpftool` utility is contained within the core `bpf` package).*
 
+#### Linux From Scratch
+
+There's no install command to give here: LFS has no package manager, so every dependency below is a source build. `make doctor` recognizes LFS by `/etc/lfs-release` (falling back to a `linux from scratch` match in `/etc/os-release`) and prints per-dependency build hints instead of a package name.
+
+> ⚠️ **This section is a stub, and the guidance in it is unverified.**
+> It was written from what `scripts/doctor.sh` checks, not from a working LFS build; nobody has yet run `make doctor` on an LFS system. If you're on LFS, please replace the TODOs with whatever actually worked for you and delete this banner.
+
+| Dependency     | What doctor checks                              | How to satisfy it                                                                                                                                                                                                   |
+|----------------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| clang + LLVM   | `clang --print-targets` lists `bpf`             | Build LLVM+Clang per BLFS, with `BPF` present in `LLVM_TARGETS_TO_BUILD`. **TODO:** confirm whether the BLFS default target list already includes BPF, or whether the `-DLLVM_TARGETS_TO_BUILD` line needs editing. |
+| bpftool        | `bpftool` is on `PATH`                          | `make -C <kernel-source>/tools/bpf/bpftool install`. **TODO:** confirm the resulting install prefix lands on `PATH`.                                                                                                |
+| libelf         | `ldconfig -p` mentions `libelf`                 | Build elfutils per BLFS. **TODO:** confirm this is enough for the `ldconfig -p` check, or whether an explicit `ldconfig` run is needed afterward.                                                                  |
+| kernel headers | `/lib/modules/$(uname -r)/build` is a directory | Point that path at the kernel tree you built. **TODO:** confirm whether an LFS kernel install creates the `build` symlink itself, or whether it has to be made by hand.                                            |
+
+N.B.: the **Install BPF Linker** step below is unaffected. `cargo install bpf-linker` links against the LLVM bundled inside `rustc`, not against your system LLVM, so the plain Linux invocation applies on LFS too; the BLFS LLVM above is only there to give you a `clang` that can target BPF.
+
 #### macOS (Cross-Compilation & Toolchain Verification Only)
 ```bash
 brew install llvm libelf
@@ -66,10 +82,19 @@ brew install llvm libelf
 > To actively run, inject, or run validation profiling against the firewall bytecode, macOS developers **must** utilize the automated Linux guest execution engine via `cargo xtask`.
 
 ### 2. Install BPF Linker
-We use the specialized LLVM-based linker for Rust eBPF programs to emit valid ELF binaries that the kernel can verify:
+We use the specialized LLVM-based linker for Rust eBPF programs to emit valid ELF binaries that the kernel can verify.
+
+On Linux, the default build links against the LLVM bundled inside `rustc`, so the plain install works:
 ```bash
 cargo install bpf-linker
 ```
+
+On macOS, build against the Homebrew LLVM installed above. Two details matter here: as of bpf-linker 0.10 the LLVM major version is itself a cargo feature (`llvm-20`/`llvm-21`/`llvm-22`), so `--no-default-features` alone selects no LLVM binding at all and the build fails with dozens of unresolved `llvm_sys` errors; and Homebrew's LLVM is keg-only, so the build script needs `LLVM_PREFIX` to locate `llvm-config`:
+```bash
+LLVM_PREFIX=$(brew --prefix llvm) cargo install bpf-linker --no-default-features --features llvm-22
+```
+
+Pick the `llvm-2x` feature matching your installed LLVM major version (check with `$(brew --prefix llvm)/bin/llvm-config --version`; Homebrew currently ships 22). N.B.: the resulting binary stays linked against that Homebrew LLVM, so a `brew upgrade llvm` that bumps the major version breaks `bpf-linker` until you reinstall it with the matching feature.
 
 ---
 
